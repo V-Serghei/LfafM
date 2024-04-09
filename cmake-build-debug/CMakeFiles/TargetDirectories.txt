@@ -1,0 +1,3 @@
+D:/university garbage/LFAF/LFaf/cmake-build-debug/CMakeFiles/LFaf.dir
+D:/university garbage/LFAF/LFaf/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/university garbage/LFAF/LFaf/cmake-build-debug/CMakeFiles/rebuild_cache.dir
