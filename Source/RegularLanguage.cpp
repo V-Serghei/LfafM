@@ -122,7 +122,7 @@ void RegularLanguage::RemovalOfDeadCharacters() {
 
     for(auto del:uniqueSymbols){
         std::string str(1, del);
-        P.erase(str);
+        if(str != current)P.erase(str);
     }
     for (auto& pair : P) {
         auto& values = pair.second;
@@ -138,7 +138,7 @@ void RegularLanguage::RemovalOfDeadCharacters() {
             }
 
             if (containsSymbol) {
-                it = values.erase(it);
+                if(it[0] != current)it = values.erase(it);
             } else {
                 ++it;
             }
@@ -186,15 +186,22 @@ void RegularLanguage::DeletionOfReplacements() {
 ///
 ///Step 4: Removal Of Unproductive Characters
 ///
+
+//TODO: Исправить, должна быть проверка на возможность выхода через другой символ
+//TODO: Fix, there should be a check to be able to exit through another character
 void RegularLanguage::RemovalOfUnproductiveCharacters() {
     std::vector<char> uniqueSymbols;
+    map<string , vector<string>> tmp;
+
     vector<string> stDel;
     bool delUnprodCh;
     for (auto& rule : P) {
         vector<string> &rightRul = rule.second;
         delUnprodCh = false;
         for (size_t i = 0; i < rightRul.size(); ++i) {
+
             if (rightRul[i].size() == 1) {
+
                 delUnprodCh = true;
                 break;
             }

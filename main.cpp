@@ -19,7 +19,7 @@ int main() {
     cout<<endl;
     cout<<"Removal Of Unproductive Characters\n";
     regLeng.RemovalOfUnproductiveCharacters();
-    regLeng.RemovalOfDeadCharacters();
+   regLeng.RemovalOfDeadCharacters();
     regLeng.PrintLanguageRules();
     cout<<endl;
 
