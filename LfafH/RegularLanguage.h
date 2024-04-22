@@ -20,7 +20,10 @@ private:
     string currentKey;
     std::string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     std::queue<std::string> ABC;
+    vector<char> Vn;
 public:
+    bool isTerminalSymbol(char symbol);
+
     void LanguageRulesInput();
 
     void DeletionOfEpsilonProductions();
@@ -33,6 +36,7 @@ public:
                                            const string& targetValue);
     void RemovalOfUnproductiveCharacters();
 
+
     static bool hasLowerCase(const string& str);
     static bool isLowerCase(char ch);
 
@@ -40,5 +44,23 @@ public:
 
     void PrintLanguageRules();
 
+public:
+
+    void DelMeaninglessTransition();
+    void RemovingLeftRecursion();
+
+    void delLeftRecFromSym(string A);
+
+    bool comIndexWildcard(const char &AL, const char &AR);
+
+    void Wildcard(const string& AL, const string &AR);
+
+    void NormalFormOfGreibach();
+
+    void substitutionForNormalShape(const string& A, const string &modif);
+
+    static bool containsSymbol(vector<pair<string, string>> newAddReg, char symbol);
+
+    void printMapWithRule();
 };
 #endif //LFAF_REGULARLANGUAGE_H

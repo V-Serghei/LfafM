@@ -1,10 +1,17 @@
 //
 // Created by Sitovlas on 10.04.2024.
 //
+#include <set>
 #include "../LfafH/RegularLanguage.h"
 ///
 ///Introduction is accompanied by compliance with specific rules
 ///
+
+
+bool RegularLanguage::isTerminalSymbol(char symbol) {
+    return !isupper(symbol) || !isalpha(symbol) || isdigit(symbol);
+}
+
 void RegularLanguage::LanguageRulesInput() {
     string input;
     cout << "Enter a language rule |___|=>|___| (or 'end' to complete): ";
@@ -15,7 +22,9 @@ void RegularLanguage::LanguageRulesInput() {
         if (input == "end") {
             break;
         }
-
+        if( std::find(Vn.begin(), Vn.end(), input[0]) == Vn.end()){
+                Vn.push_back(input[0]);
+        }
         if (!isupper(input[0])) {
             cout << "The first character should be uppercase. Repeat the input." << endl;
             continue;
@@ -187,33 +196,71 @@ void RegularLanguage::DeletionOfReplacements() {
 ///Step 4: Removal Of Unproductive Characters
 ///
 
-//TODO: Исправить, должна быть проверка на возможность выхода через другой символ
-//TODO: Fix, there should be a check to be able to exit through another character
 void RegularLanguage::RemovalOfUnproductiveCharacters() {
-    std::vector<char> uniqueSymbols;
-    map<string , vector<string>> tmp;
+    set<char> prodS;
 
-    vector<string> stDel;
-    bool delUnprodCh;
-    for (auto& rule : P) {
-        vector<string> &rightRul = rule.second;
-        delUnprodCh = false;
-        for (size_t i = 0; i < rightRul.size(); ++i) {
+    for (const auto& rule : P)
+    {
+        const vector<string>& rRul = rule.second;
 
-            if (rightRul[i].size() == 1) {
+        for (const string& prod : rRul)
+        {
+            for (char symbol : prod)
+            {
 
-                delUnprodCh = true;
-                break;
+                if (isTerminalSymbol(symbol))
+                {
+                    prodS.insert(symbol);
+                }
             }
         }
-        if(!delUnprodCh)stDel.push_back(rule.first);
-
-
     }
-    for (const auto& p : stDel) {
-        P.erase(p);
+    bool flag = true;
+    while (flag)
+    {
+        flag = false;
+
+        for (const auto& rule : P)
+        {
+            const vector<string>& rRul = rule.second;
+
+            for (const string& prod : rRul)
+            {
+                bool isProductive = true;
+
+                for (char symbol : prod)
+                {
+                    if (!isTerminalSymbol(symbol) && prodS.find(symbol) == prodS.end())
+                    {
+                        isProductive = false;
+                        break;
+                    }
+                }
+                if (isProductive)
+                {
+                    if (prodS.insert(rule.first[0]).second)
+                    {
+                        flag = true;
+                    }
+                }
+            }
+        }
+    }
+
+    std::vector<std::string> unProdS;
+    for (const auto& rule : P)
+    {
+        if (prodS.find(rule.first[0]) == prodS.end())
+        {
+            unProdS.push_back(rule.first);
+        }
+    }
+    for (const auto& symbol : unProdS)
+    {
+        P.erase(symbol);
     }
 }
+
 ///
 ///Step 5: Chomsky Normal Form
 ///
@@ -320,6 +367,7 @@ string RegularLanguage::findFirstWithSecondValue(const vector<pair<string, strin
 
     return "";
 }
+
 ///verification
 /// \param str // the word in which you want to find a lowercase
 /// \return //lowercase confirmation
@@ -336,6 +384,302 @@ bool RegularLanguage::hasLowerCase(const string &str) {
 /// \return bool
 bool RegularLanguage::isLowerCase(char ch) {
     return std::islower(ch) != false;
+}
+
+
+
+
+///"Normal form of Greibach"
+///
+///
+
+
+void RegularLanguage::RemovingLeftRecursion() {
+
+
+    bool flag = true;
+    bool flagReset = false;
+    while (flag) {
+        flag = false;
+        for (const auto &rule: P) {
+            const vector<string> &rRul = rule.second;
+
+            for (const string &prod: rRul) {
+
+
+                    if (!isTerminalSymbol(prod[0])) {
+                        if (prod[0] == rule.first[0]) {
+                            flag = true;
+                            delLeftRecFromSym(rule.first);
+                            flagReset = true;
+                        }
+
+                    }
+                    if(flagReset){
+                        break;
+                    }
+
+            }
+            if(flagReset){
+                flagReset = false;
+                break;
+            }
+
+        }
+        DelMeaninglessTransition();
+
+        for (const auto &rule: P) {
+            const vector<string> &rRul = rule.second;
+
+            for (const string &prod: rRul) {
+
+                    if (!isTerminalSymbol(prod[0])) {
+                        if (comIndexWildcard(rule.first[0], prod[0])) {
+                            flag = true;
+                            Wildcard(rule.first,prod);
+                            flagReset = true;
+                        }
+                    }
+                if(flagReset){
+                    break;
+                }
+            }
+            if(flagReset){
+                flagReset = false;
+                break;
+            }
+        }
+        DelMeaninglessTransition();
+
+
+
+    }
+
+
+}
+
+std::string strCreateAlfa(const std::string& str) {
+    if (str.empty() || str.length() == 1) {
+        return "";
+    }
+
+    return str.substr(1);
+}
+
+void RegularLanguage::delLeftRecFromSym(string A) {
+    vector<pair<string,string>> correct;
+    vector<string> alfa;
+    vector<string> betta;
+    string Y = ABC.front();
+
+    ABC.pop();
+    Vn.push_back(Y[0]);
+
+
+    vector<string> arrP = P[A];
+   // for (const auto &rule: P) {
+       // const vector<string> &rRul = rule.second;
+
+        for (const string &prod: arrP) {
+
+                if (!isTerminalSymbol(prod[0])) {
+                    if (prod[0] == A[0]) {
+                        alfa.push_back(strCreateAlfa(prod));
+                        continue;
+                    }
+                }
+                else
+                {
+                    betta.push_back(prod);
+                }
+        }
+        const auto& a1 = A;
+        P.erase(a1);
+        for( const auto& currBetta : betta){
+            P[A].push_back(currBetta + Y);
+            P[A].push_back(currBetta);
+        }
+        for(const auto& currAlfa : alfa){
+            P[Y].push_back(currAlfa);
+            P[Y].push_back(currAlfa+Y);
+        }
+
+   // }
+
+}
+
+bool RegularLanguage::comIndexWildcard(const char &AL, const char &AR) {
+    auto it1 = std::find(Vn.begin(), Vn.end(), AL);
+    auto it2 = std::find(Vn.begin(), Vn.end(), AR);
+
+    if (it1 == Vn.end() || it2 == Vn.end()) {
+        return false;
+    }
+
+    return std::distance(Vn.begin(), it1) > std::distance(Vn.begin(), it2);
+}
+
+void RegularLanguage::Wildcard(const string& AL, const string &AR) {
+
+    vector<string> substitution = P[AR.substr(0, 1)];
+    string stored = strCreateAlfa(AR);
+
+    auto it = P.find(AL);
+    if (it != P.end()) {
+        auto vec = it->second;
+        auto arIt = std::find(vec.begin(), vec.end(), AR);
+
+        if (arIt != vec.end()) {
+            vec.erase(arIt);
+            it->second = vec;
+        }
+    }
+
+    for( const auto& pr : substitution){
+        P[AL].push_back(pr+stored);
+    }
+
+
+}
+
+void RegularLanguage::DelMeaninglessTransition() {
+    for (auto& entry : P) {
+        const std::string& key = entry.first;
+        std::vector<std::string>& vec = entry.second;
+
+        vec.erase(std::remove_if(vec.begin(), vec.end(), [&](const std::string& str) {
+            return str == key;
+        }), vec.end());
+    }
+}
+
+
+void RegularLanguage::NormalFormOfGreibach() {
+
+    vector<pair<string,string>> newAddReg;
+    bool flagReset = false;
+    bool flag = true;
+    while (flag) {
+        flag = false;
+        for (const auto &rule: P) {
+            const vector<string> &rRul = rule.second;
+
+            for (const string &prod: rRul) {
+
+
+                if (!isTerminalSymbol(prod[0])) {
+                    //if (prod[0] == rule.first[0]) {
+                    substitutionForNormalShape(rule.first,prod);
+                    flag = true;
+                    flagReset = true;
+
+                   // }
+                }
+                if(flagReset){
+                    break;
+                }
+            }
+            if(flagReset){
+                flagReset = false;
+                break;
+            }
+
+        }
+    }
+    for (auto& rule : P)
+    {
+        vector<string>& rRul = rule.second;
+
+        for (string& prod : rRul)
+        {
+            string sym = strCreateAlfa(prod);
+            for (std::size_t i = 0; i < sym.size(); ++i) {
+                if (isTerminalSymbol(sym[i])) {
+                    auto it = std::find_if(newAddReg.begin(), newAddReg.end(), [&](const auto& pair) {
+                        return pair.second == std::string(1, sym[i]);
+                    });
+
+                    if (it != newAddReg.end()) {
+                        prod[i+1] = it->first[0];
+                    } else {
+                        newAddReg.emplace_back(ABC.front(), std::string(1, sym[i]));
+                        Vn.push_back(ABC.front()[0]);
+                        ABC.pop();
+                    }
+                }
+            }
+
+        }
+    }
+
+    for(const auto& Add : newAddReg){
+        P[Add.first].push_back(Add.second);
+    }
+
+
+
+
+
+}
+
+void RegularLanguage::substitutionForNormalShape(const string& A, const string &modif) {
+    vector<string> substitution = P[modif.substr(0, 1)];
+    string stored = strCreateAlfa(modif);
+
+    auto it = P.find(A);
+    if (it != P.end()) {
+        auto vec = it->second;
+        auto arIt = std::find(vec.begin(), vec.end(), modif);
+
+        if (arIt != vec.end()) {
+            vec.erase(arIt);
+            it->second = vec;
+        }
+    }
+    for( const auto& pr : substitution){
+        P[A].push_back(pr+stored);
+    }
+
+
+
+
+}
+
+bool RegularLanguage::containsSymbol(vector<pair<string, string>> newAddReg, char symbol) {
+    return std::find_if(newAddReg.begin(), newAddReg.end(), [&](const auto& pair) {
+        return pair.second == std::string(1, symbol);
+    }) != newAddReg.end();
+}
+
+void RegularLanguage::printMapWithRule() {
+    int i = 1;
+    for(auto key : Vn){
+
+        vector<string> reg = P[std::string(1, key)];
+        for(auto rul:reg){
+            cout << i++ << ") A";
+            auto it = std::find(Vn.begin(), Vn.end(), key);
+            int index = std::distance(Vn.begin(), it);
+            cout << index << "=> ";
+            for(auto ch:rul){
+                if(isTerminalSymbol(ch)){
+                    cout<<ch;
+                }else{
+                    auto it1 = std::find(Vn.begin(), Vn.end(), ch);
+                    int index1 = std::distance(Vn.begin(), it1);
+                    cout<<"A"<<index1;
+                }
+            }
+            cout<<endl;
+        }
+
+
+
+    }
+
+
+
+
 }
 
 
