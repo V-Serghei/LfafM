@@ -1,15 +1,31 @@
 //
 // Created by Sitovlas on 10.04.2024.
 //
+#include "lfaf/RegularLanguage.h"
+
+#include <algorithm>
+#include <cctype>
+#include <iostream>
 #include <set>
-#include "../LfafH/RegularLanguage.h"
+
+using std::cin;
+using std::cout;
+using std::endl;
+using std::pair;
+using std::set;
+using std::size_t;
+using std::string;
+using std::vector;
+
 ///
 ///Introduction is accompanied by compliance with specific rules
 ///
 
 
 bool RegularLanguage::isTerminalSymbol(char symbol) {
-    return !isupper(symbol) || !isalpha(symbol) || isdigit(symbol);
+    return !std::isupper(static_cast<unsigned char>(symbol))
+           || !std::isalpha(static_cast<unsigned char>(symbol))
+           || std::isdigit(static_cast<unsigned char>(symbol));
 }
 
 void RegularLanguage::LanguageRulesInput() {
@@ -22,10 +38,13 @@ void RegularLanguage::LanguageRulesInput() {
         if (input == "end") {
             break;
         }
-        if( std::find(Vn.begin(), Vn.end(), input[0]) == Vn.end()){
+        if (input.empty()) {
+            continue;
+        }
+        if (std::find(Vn.begin(), Vn.end(), input[0]) == Vn.end()){
                 Vn.push_back(input[0]);
         }
-        if (!isupper(input[0])) {
+        if (!std::isupper(static_cast<unsigned char>(input[0]))) {
             cout << "The first character should be uppercase. Repeat the input." << endl;
             continue;
         }
@@ -109,7 +128,7 @@ void RegularLanguage::RemovalOfDeadCharacters() {
         stLeftL.push_back(rule.first[0]);
         for (const auto& value : rule.second) {
             for (char ch : value) {
-                if (std::isupper(ch)) {
+                if (std::isupper(static_cast<unsigned char>(ch))) {
                     if (std::find(stRightL.begin(), stRightL.end(), ch) == stRightL.end()) {
                         stRightL.push_back(ch);
                     }
@@ -373,7 +392,7 @@ string RegularLanguage::findFirstWithSecondValue(const vector<pair<string, strin
 /// \return //lowercase confirmation
 bool RegularLanguage::hasLowerCase(const string &str) {
     for (char ch : str) {
-        if (std::islower(ch)) {
+        if (std::islower(static_cast<unsigned char>(ch))) {
             return true;
         }
     }
@@ -383,7 +402,7 @@ bool RegularLanguage::hasLowerCase(const string &str) {
 /// \param ch // verifiable character
 /// \return bool
 bool RegularLanguage::isLowerCase(char ch) {
-    return std::islower(ch) != false;
+    return std::islower(static_cast<unsigned char>(ch)) != false;
 }
 
 
@@ -681,5 +700,3 @@ void RegularLanguage::printMapWithRule() {
 
 
 }
-
-

@@ -1,17 +1,17 @@
 # LFaf
 
-LFaf - консольный C++ проект для работы с правилами формальной грамматики. Программа принимает правила языка из стандартного ввода, применяет к ним набор преобразований и выводит результат на каждом этапе.
+LFaf is a console C++ project for working with formal grammar production rules. The program reads grammar rules from standard input, applies a sequence of transformations, and prints the result after each step.
 
-Сейчас проект умеет выполнять два основных сценария:
+The project currently supports two main workflows:
 
-- приведение грамматики к нормальной форме Хомского;
-- приведение грамматики к нормальной форме Грейбах.
+- converting a grammar to Chomsky normal form;
+- converting a grammar to Greibach normal form.
 
-Эпсилон-продукция в программе задается символом `0`.
+Epsilon productions are represented by `0`.
 
-## Что делает программа
+## Program Behavior
 
-После запуска приложение показывает меню:
+After startup, the application shows this menu:
 
 ```text
 1) Normal Form Of Khom
@@ -19,27 +19,27 @@ LFaf - консольный C++ проект для работы с правил
 3) End
 ```
 
-В первом сценарии программа:
+The Chomsky normal form workflow:
 
-1. считывает правила грамматики;
-2. удаляет эпсилон-продукции;
-3. удаляет недостижимые символы;
-4. удаляет непродуктивные символы;
-5. удаляет цепные замены;
-6. преобразует правила к нормальной форме Хомского.
+1. reads grammar rules;
+2. removes epsilon productions;
+3. removes unreachable symbols;
+4. removes unproductive symbols;
+5. removes chain replacements;
+6. converts the rules to Chomsky normal form.
 
-Во втором сценарии программа:
+The Greibach normal form workflow:
 
-1. считывает правила грамматики;
-2. удаляет эпсилон-продукции;
-3. удаляет недостижимые и непродуктивные символы;
-4. устраняет левую рекурсию;
-5. преобразует правила к нормальной форме Грейбах;
-6. выводит итоговые правила и их переобозначение через `A0`, `A1`, `A2` и так далее.
+1. reads grammar rules;
+2. removes epsilon productions;
+3. removes unreachable and unproductive symbols;
+4. removes left recursion;
+5. converts the rules to Greibach normal form;
+6. prints the final rules and their notation as `A0`, `A1`, `A2`, and so on.
 
-## Формат ввода
+## Input Format
 
-Каждое правило вводится в отдельной строке:
+Each production rule is entered on a separate line:
 
 ```text
 S AC
@@ -47,13 +47,13 @@ A a
 C 0
 ```
 
-Левая часть должна начинаться с заглавной буквы. Между левой и правой частью нужен пробел. Чтобы завершить ввод правил, нужно ввести:
+The left-hand side must start with an uppercase letter. The left-hand side and right-hand side must be separated by a space. To finish entering rules, type:
 
 ```text
 end
 ```
 
-Пример набора правил:
+Example input:
 
 ```text
 S AC
@@ -68,82 +68,65 @@ C 0
 end
 ```
 
-## Структура проекта
+## Project Structure
 
 ```text
 .
+|-- .github/
+|   `-- workflows/
+|       `-- ci.yml
 |-- CMakeLists.txt
-|-- main.cpp
-|-- LfafH/
-|   `-- RegularLanguage.h
-`-- Source/
-    `-- RegularLanguage.cpp
+|-- README.md
+|-- include/
+|   `-- lfaf/
+|       `-- RegularLanguage.h
+|-- src/
+|   |-- main.cpp
+|   `-- RegularLanguage.cpp
+`-- tests/
+    `-- regular_language_tests.cpp
 ```
 
-- `main.cpp` содержит консольное меню и последовательность вызовов алгоритмов.
-- `LfafH/RegularLanguage.h` описывает класс `RegularLanguage`, его состояние и публичные операции.
-- `Source/RegularLanguage.cpp` содержит реализацию ввода правил, очистки грамматики и преобразований к нормальным формам.
-- `CMakeLists.txt` описывает сборку исполняемого файла `LFaf`.
+- `src/main.cpp` contains the console menu and the order in which algorithms are executed.
+- `include/lfaf/RegularLanguage.h` declares the `RegularLanguage` class, its state, and public operations.
+- `src/RegularLanguage.cpp` implements rule input, grammar cleanup, and normal form transformations.
+- `tests/regular_language_tests.cpp` contains basic CTest checks for helper methods.
+- `.github/workflows/ci.yml` builds the project and runs tests for the `master` branch.
+- `CMakeLists.txt` defines the `LFaf` executable, the core library, and the test target.
 
-## Как собрать и запустить
+## Build And Run
 
-Нужны CMake и компилятор C++ с поддержкой C++20.
+Requirements:
 
-Сборка из корня проекта:
+- CMake;
+- a C++ compiler with C++20 support.
+
+Build from the project root:
 
 ```bash
 cmake -S . -B build
 cmake --build build
 ```
 
-Запуск на Windows:
+Run tests:
+
+```bash
+ctest --test-dir build --output-on-failure
+```
+
+Run on Windows:
 
 ```bash
 .\build\LFaf.exe
 ```
 
-Если используется CLion, проект можно открыть как CMake-проект и запустить цель `LFaf` из IDE.
+If you use CLion, open the repository as a CMake project and run the `LFaf` target from the IDE.
 
-## Как использовать
+## Usage
 
-1. Запустите программу.
-2. Выберите вариант `1` для формы Хомского или `2` для формы Грейбах.
-3. Введите правила грамматики по одному правилу на строку.
-4. Используйте `0` для эпсилон-продукции.
-5. Введите `end`, чтобы завершить ввод.
-6. Просмотрите промежуточные и итоговые правила в консоли.
-
-## Идеи для улучшения структуры
-
-Текущая структура подходит для небольшого учебного проекта, но при расширении код станет легче читать и поддерживать, если разделить ответственность между файлами и классами.
-
-Возможные улучшения:
-
-- Переименовать папки в более привычный C++ формат: `include/` для заголовков и `src/` для реализаций.
-- Разделить консольный интерфейс и алгоритмы: оставить меню и ввод-вывод в `main.cpp` или отдельном `ConsoleApp`, а `RegularLanguage` сделать классом только для работы с грамматикой.
-- Вынести модель грамматики в отдельный тип, например `Grammar`, чтобы алгоритмы не работали напрямую с внутренней `map<string, vector<string>>`.
-- Разделить алгоритмы по файлам: очистка грамматики, форма Хомского и форма Грейбах могут жить в отдельных модулях.
-- Добавить отдельные функции для парсинга и валидации строк ввода, чтобы обработка ошибок была понятнее и не смешивалась с преобразованиями.
-- Добавить тесты для каждого преобразования: удаление эпсилон-продукций, цепных правил, непродуктивных символов, левой рекурсии и итоговых нормальных форм.
-- Убрать глобальное `using namespace std;` из заголовочного файла, чтобы он не влиял на все файлы, которые его подключают.
-- Избавиться от ручного выделения памяти в `main.cpp`: объект `RegularLanguage` можно создавать как обычную локальную переменную.
-
-Один из возможных вариантов будущей структуры:
-
-```text
-.
-|-- CMakeLists.txt
-|-- README.md
-|-- include/
-|   `-- lfaf/
-|       |-- Grammar.h
-|       |-- GrammarParser.h
-|       `-- NormalForms.h
-|-- src/
-|   |-- main.cpp
-|   |-- Grammar.cpp
-|   |-- GrammarParser.cpp
-|   `-- NormalForms.cpp
-`-- tests/
-    `-- grammar_tests.cpp
-```
+1. Start the program.
+2. Choose `1` for Chomsky normal form or `2` for Greibach normal form.
+3. Enter grammar rules, one rule per line.
+4. Use `0` for epsilon productions.
+5. Enter `end` to finish rule input.
+6. Review the intermediate and final rules printed in the console.
